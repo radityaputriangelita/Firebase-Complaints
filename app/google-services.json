@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "280479239695",
+    "project_id": "complaints-df7de",
+    "storage_bucket": "complaints-df7de.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:280479239695:android:23ad917c7eb9e1db911d7a",
+        "android_client_info": {
+          "package_name": "com.example.firebase"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB6xBRfeK3bT3tynA7qbJO1iP0pPzPLTXM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
