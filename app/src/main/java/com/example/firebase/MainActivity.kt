@@ -12,6 +12,7 @@ import com.example.firebase.databinding.ActivityMainBinding
 import com.google.firebase.firestore.FirebaseFirestore
 
 
+
 class MainActivity : AppCompatActivity() {
     //intance titik awal penggunaan firebase
     private val firestore = FirebaseFirestore.getInstance()
@@ -35,6 +36,7 @@ class MainActivity : AppCompatActivity() {
         with(binding) {
             btnTambah.setOnClickListener {
                 val intent = Intent(this@MainActivity, formactivity::class.java)
+                intent.putExtra("action_type", "add")
                 startActivity(intent)
             }
 
@@ -45,6 +47,7 @@ class MainActivity : AppCompatActivity() {
                 // Create an Intent to start the ActivityFormActivity
                 val intent = Intent(this@MainActivity, formactivity::class.java).apply {
                     // Pass the data to the ActivityFormActivity
+                    putExtra("action_type", "update")
                     putExtra("complaint_id", item.id)
                     putExtra("complaint_name", item.name)
                     putExtra("complaint_title", item.title)
