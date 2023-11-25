@@ -14,31 +14,28 @@ class formactivity : AppCompatActivity() {
 
     //intance titik awal penggunaan firebase
     private val firestore = FirebaseFirestore.getInstance()
-    //devinisi database budgets
+    //definisiin database
     private val complaintCollectionRef = firestore.collection("complaints")
     //binding doang
     private lateinit var binding: ActivityFormactivityBinding
     //NYIMPEN ID SAAT ADA UPDATE
     private var updateId = ""
-    //deklarasi saat update
-    private val budgetListLiveData: MutableLiveData<List<Complaint>> by lazy {
-        MutableLiveData<List<Complaint>>()
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityFormactivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
+        //get data yang udah di intent
         val complaintId = intent.getStringExtra("complaint_id")
         val complaintName = intent.getStringExtra("complaint_name")
         val complaintTitle = intent.getStringExtra("complaint_title")
         val complaintDescription = intent.getStringExtra("complaint_description")
+        //bawa action type nya juga biar tau dia mau update atau add biar button yang muncul sesuai
         val actionType = intent.getStringExtra("action_type")
 
-
-        // Set the retrieved data to the EditText fields in ActivityFormActivity
+        //set daya yang udah di intent sesuai inputannya dan nyimpen id yang udh di intent buat update nanti kalau ada.
+        //nyimpen id kalau mau update ke updateId
         updateId = intent.getStringExtra("complaint_id") ?: ""
         binding.edtName.setText(complaintName ?: "")
         binding.edtTitle.setText(complaintTitle ?: "")
@@ -46,10 +43,10 @@ class formactivity : AppCompatActivity() {
 
         with(binding){
             if (actionType == "add") {
-                // Menampilkan btnAdd jika jenis aksi adalah tambah
+                // Menampilkan btnAdd kalau dia milihnya buat tambah data
                 btnAdd.visibility = View.VISIBLE
                 btnUpdate.visibility = View.GONE
-                //nambahin data yang diisi di form
+                //hubungin data yang diisi di form buat ditambahin
                 btnAdd.setOnClickListener {
                     val name = edtName.text.toString()
                     val title = edtTitle.text.toString()
@@ -61,10 +58,10 @@ class formactivity : AppCompatActivity() {
                     addComplaint(newComplaint)
                 }
             }else if (actionType == "update") {
-                // Menampilkan btnUpdate jika jenis aksi adalah pembaruan
+                // munculin btn update kalo klik listnya buat update
                 btnUpdate.visibility = View.VISIBLE
                 btnAdd.visibility = View.GONE
-                //update data yang ada diform
+                //terus ada functionnya btn update
                 btnUpdate.setOnClickListener {
                     val name = edtName.text.toString()
                     val title = edtTitle.text.toString()
@@ -72,21 +69,20 @@ class formactivity : AppCompatActivity() {
                     val complaintToUpdate =
                         Complaint(name = name, title = title, description = description)
 
-                    // Jika updateId tidak kosong, maka lakukan pembaruan
+                    // kalo update id nya ga kosong terus di update sesuai id nya
                     if (updateId.isNotEmpty()) {
                         updateComplaint(complaintToUpdate)
                     } else {
-                        // Jika updateId kosong, tambahkan komplain baru
+                        // tapi kalau dia kosong jadiin dia sebagai update baru
                         addComplaint(complaintToUpdate)
                     }
-
-                    // Bersihkan field setelah pembaruan atau penambahan data
                 }
             }
         }
     }
     //nambah budgetnya
     private fun addComplaint(complaint: Complaint) {
+        //definisiin dia dengan databasenya
         complaintCollectionRef
             .add(complaint)
             .addOnSuccessListener { documentReference ->
@@ -94,50 +90,41 @@ class formactivity : AppCompatActivity() {
                 complaint.id = createdComplaintId
                 documentReference.set(complaint)
                     .addOnSuccessListener {
-                        // Data added successfully, start MainActivity
+                        // balik ke main kalo nambahnya berhasil
                         val intent = Intent(this@formactivity, MainActivity::class.java)
                         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
                         startActivity(intent)
-                        finish() // Close current activity if needed
+                        finish()
                     }
+                    // error handlingnya kalo ga bisa balik
                     .addOnFailureListener { exception ->
                         Log.d("formactivity", "Error updating document", exception)
-                        // Handle failure to set data if needed
                     }
             }
+            // error handling kalo ga bisa nyimpen
             .addOnFailureListener { exception ->
                 Log.d("formactivity", "Error adding document", exception)
-                // Handle failure to add data if needed
             }
     }
     //update data budget baru
     private fun updateComplaint(complaint: Complaint) {
-        // Menggunakan update() untuk mempertahankan data yang ada
+        // pake function update() dimana nanti data yang ga di update bakal tetap
         complaintCollectionRef.document(updateId).update(
             "name", complaint.name,
             "title", complaint.title,
             "description", complaint.description
         )
+
+            // Dbalikin data ke main kalo udh update
             .addOnSuccessListener {
-                // Data berhasil diperbarui, kembali ke MainActivity
                 val intent = Intent(this@formactivity, MainActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
                 startActivity(intent)
-                finish() // Tutup activity saat ini jika diperlukan
+                finish()
             }
+            //error handling kalo gagal update datanya
             .addOnFailureListener { exception ->
                 Log.d("formactivity", "Error updating document", exception)
-                // Tangani jika gagal memperbarui data jika diperlukan
             }
-    }
-
-
-    //format data yang isinya empty
-    private fun setEmptyField() {
-        with(binding) {
-            edtName.setText("")
-            edtTitle.setText("")
-            edtName.setText("")
-        }
     }
 }

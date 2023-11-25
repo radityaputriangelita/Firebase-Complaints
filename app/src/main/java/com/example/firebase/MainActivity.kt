@@ -16,12 +16,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 class MainActivity : AppCompatActivity() {
     //intance titik awal penggunaan firebase
     private val firestore = FirebaseFirestore.getInstance()
-    //devinisi database budgets
+    //devinisi database
     private val complaintCollectionRef = firestore.collection("complaints")
     //binding doang
     private lateinit var binding: ActivityMainBinding
-    //NYIMPEN ID SAAT ADA UPDATE
-    private var updateId = ""
     //deklarasi saat update
     private val complaintListLiveData: MutableLiveData<List<Complaint>> by lazy {
         MutableLiveData<List<Complaint>>()
@@ -34,6 +32,7 @@ class MainActivity : AppCompatActivity() {
 
 
         with(binding) {
+            //pindah ke intent bawa action type biar btn nya beda
             btnTambah.setOnClickListener {
                 val intent = Intent(this@MainActivity, formactivity::class.java)
                 intent.putExtra("action_type", "add")
@@ -44,7 +43,7 @@ class MainActivity : AppCompatActivity() {
             listView.setOnItemClickListener { adapterView, _, i, _ ->
                 val item = adapterView.adapter.getItem(i) as Complaint
 
-                // Create an Intent to start the ActivityFormActivity
+                // bawa data pake intent dari type sampe id
                 val intent = Intent(this@MainActivity, formactivity::class.java).apply {
                     // Pass the data to the ActivityFormActivity
                     putExtra("action_type", "update")
@@ -59,35 +58,36 @@ class MainActivity : AppCompatActivity() {
             listView.onItemLongClickListener = AdapterView.OnItemLongClickListener {
                     adapterView, _, i, _ ->
                 val item = adapterView.adapter.getItem(i) as Complaint
-                deleteBudget(item)
+                deleteComplaints(item)
                 true
             }
         }
-        observeBudgets()
-        getAllBudgets()
+        observeComplaints()
+        getAllComplaints()
     }
 
-    //untuk ambil data budgetnya
-    private fun getAllBudgets() {
-        observeBudgetChanges()
+    //untuk ambil data
+    private fun getAllComplaints() {
+        observeComplaintChanges()
     }
-    //untuk observe nya budget yang ada
-    private fun observeBudgets() {
+    //untuk observe data yang ada
+    private fun observeComplaints() {
         complaintListLiveData.observe(this) { complaints ->
             val adapter = ArrayAdapter(
                 this,
-                R.layout.list_item_aduan,  // Use the correct layout resource ID here
-                R.id.textViewComplaintItem,    // Specify the ID of the TextView in the layout
+                R.layout.list_item_aduan,
+                //spesift id nya jadi bisa ketauan mana yang mana
+                R.id.textViewComplaintItem,
                 complaints.toMutableList()
             )
             binding.listView.adapter = adapter
         }
     }
-    //cek perubahan di budget, kalo erorr nanti muncul notip di log, kalo dia val nya ada nanti dia muncul
-    private fun observeBudgetChanges() {
+    //cek perubahan di complaints, kalo erorr nanti muncul notip di log, kalo dia val nya ada nanti dia muncul
+    private fun observeComplaintChanges() {
         complaintCollectionRef.addSnapshotListener { snapshots, error ->
             if (error != null) {
-                Log.d("MainActivity", "Error listening for budget changes: ", error)
+                Log.d("MainActivity", "Error listening for complaints changes: ", error)
                 return@addSnapshotListener
             }
             val complaints = snapshots?.toObjects(Complaint::class.java)
@@ -97,7 +97,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
     //buat hapusnya
-    private fun deleteBudget(complaint: Complaint) {
+    private fun deleteComplaints(complaint: Complaint) {
         if (complaint.id.isEmpty()) {
             Log.d("MainActivity", "Error deleting: budget ID is empty!")
             return
